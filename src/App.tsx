@@ -160,12 +160,12 @@ const AppContent: React.FC = () => {
   };
 
   const handleHarvest = () => {
-    setCropState('barren');
+    setCakeState('barren');
   };
 
   return (
     <>
-      <FarmField cropState={cropState} onHarvest={handleHarvest} />
+      <FarmField cropState={cropState} onHarvest={handleHarvest} adsLeft={adsLeft} />
 
       <ReferralSystem
         userId={userId}
@@ -174,7 +174,7 @@ const AppContent: React.FC = () => {
         setExtraAdsUnlocked={setExtraAdsUnlocked}
       />
 
-      <Profile stats={{ ...stats, invites: referrals.length }} />
+      <Profile stats={{ ...stats, invites: Array.isArray(referrals) ? referrals.length : 0 }} />
 
       <AdWatcher
         onComplete={handleAdComplete}
