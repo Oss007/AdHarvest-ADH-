@@ -1,38 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
-import { Play, Droplets, X } from 'lucide-react';
+import { Play, Droplets, X, Check } from 'lucide-react';
 
 interface AdWatcherProps {
-  onComplete: () => void;
+  onComplete: () => void;  // Now calls mintADH + burnADH
   adsLeft: number;
+  setAdsLeft: (n: number) => void;  // NEW: Decrement ads
 }
 
-const AdWatcher: React.FC<AdWatcherProps> = ({ onComplete, adsLeft }) => {
+const AdWatcher: React.FC<AdWatcherProps> = ({ onComplete, adsLeft, setAdsLeft }) => {
   const { t } = useTranslation();
   const [isWatching, setIsWatching] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [timer, setTimer] = useState(30);
+  const [adError, setAdError] = useState(false);
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isWatching && timer > 0) {
-      interval = setInterval(() => {
-        setTimer((prev) => prev - 1);
-        setProgress((prev) => prev + (100 / 30));
-      }, 1000);
-    } else if (timer === 0) {
-      setIsWatching(false);
-      onComplete();
-      setTimer(30);
-      setProgress(0);
-    }
-    return () => clearInterval(interval);
-  }, [isWatching, timer, onComplete]);
-
-  const startAd = () => {
-    if (adsLeft > 0) {
-      setIsWatching(true);
+  const startAd = async () => {
+    if (adsLeft > 0 && window.show_10780044) {  // Your Monetag function!
+      try {
+        setIsWatching(true);
+        setAdError(false);
+        
+        // 🔥 REAL MONETAG REWARDED AD
+        await window.show_10780044({ type: 'rewarded' });
+        
+        // ✅ AD COMPLETED SUCCESSFULLY
+        setAdsLeft(adsLeft - 1);  // Decrement daily limit
+        onComplete();  // Mint 10 ADH + burn 2
+        setIsWatching(false);
+      } catch (e) {
+        // ❌ User closed/skipped ad → NO REWARD
+        setIsWatching(false);
+        setAdError(true);
+        console.log('Ad skipped:', e);
+      }
+    } else {
+      alert('No more ads today or SDK not loaded');
     }
   };
 
@@ -49,52 +51,28 @@ const AdWatcher: React.FC<AdWatcherProps> = ({ onComplete, adsLeft }) => {
       >
         {isWatching ? (
           <>
-            <Droplets className="animate-bounce" />
-            {t('watering')} ({timer}s)
+            <Droplets className="animate-spin" />
+            {t('watching_ad')}
           </>
         ) : (
           <>
             <Play fill="currentColor" />
-            {t('watch_ad')}
+            {t('watch_ad')} ({adsLeft} left)
           </>
         )}
       </button>
 
+      {/* SUCCESS/ERROR TOASTS */}
       <AnimatePresence>
-        {isWatching && (
+        {adError && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="mt-2 p-3 bg-red-500 text-white rounded-xl flex items-center gap-2"
           >
-            <div className="w-full max-w-md aspect-video bg-gray-800 rounded-xl flex items-center justify-center relative overflow-hidden">
-              {/* Mock Video Content */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center p-4">
-                <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mb-4 animate-pulse">
-                  <Play size={40} fill="white" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">AdHarvest ADH</h3>
-                <p className="text-sm opacity-70">Grow your farm, earn real TON tokens!</p>
-              </div>
-              
-              {/* Progress Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 h-2 bg-gray-700">
-                <motion.div
-                  className="h-full bg-primary"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progress}%` }}
-                />
-              </div>
-            </div>
-            
-            <div className="mt-8 text-white text-center">
-              <p className="text-lg font-bold mb-2">{t('watering')}</p>
-              <p className="text-sm opacity-60">Reward: 10 ADH Mint + 2 ADH Burn</p>
-            </div>
-
-            {/* Monetag SDK Script would go here in production */}
-            {/* <script src="https://alwingulla.com/88/tag.min.js" data-zone="123456"></script> */}
+            <X size={20} />
+            Watch full ad to earn ADH!
           </motion.div>
         )}
       </AnimatePresence>
