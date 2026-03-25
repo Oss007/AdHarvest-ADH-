@@ -1,5 +1,7 @@
 {
-  "url": "https://ais-pre-5sa4citq77yruxcjdlezfr-255228596859.europe-west1.run.app",
-  "name": "AdHarvest",
-  "iconUrl": "https://picsum.photos/seed/adh/200/200"
+  "url": "https://adharvest-YOURID.vercel.app",
+  "name": "AdHarvest 🌾 ADH",
+  "iconUrl": "/adh-logo.png",
+  "termsOfUseUrl": "https://adharvest.vercel.app/terms",
+  "privacyPolicyUrl": "https://adharvest.vercel.app/privacy"
 }
