@@ -1,5 +1,28 @@
 {
-  "name": "AdHarvest",
-  "description": "Earn ADH tokens by watching ads and growing your farm on the TON blockchain.",
-  "requestFramePermissions": []
+  "name": "AdHarvest 🌾 ADH",
+  "short_name": "ADH",
+  "description": "Earn ADH tokens by watching ads! Farm → Watch → Mint → Burn → Price up 🚀 TON Blockchain",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fdf8",
+  "theme_color": "#4CAF50",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/adh-logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/adh-logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["games", "finance", "productivity"],
+  "lang": "en",
+  "dir": "ltr",
+  "requestFramePermissions": [],
+  "scope": "/",
+  "referrer": "origin"
 }
