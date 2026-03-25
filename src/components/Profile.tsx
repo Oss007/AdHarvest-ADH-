@@ -24,6 +24,9 @@ const Profile: React.FC<ProfileProps> = ({ stats }) => {
     return 'ADH Tycoon';
   };
 
+  // SAFETY: Ensure invites is a number to prevent .length errors
+  const invitesCount = typeof stats.invites === 'number' ? stats.invites : 0;
+
   return (
     <div className="p-6 bg-white rounded-3xl shadow-lg m-4 border border-gray-100">
       {/* PROFILE HEADER */}
@@ -60,7 +63,7 @@ const Profile: React.FC<ProfileProps> = ({ stats }) => {
       <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-gradient-to-r from-emerald-50 to-blue-50 rounded-2xl">
         <div className="flex flex-col items-center text-center">
           <Users className="w-10 h-10 text-emerald-500 mb-1" />
-          <span className="font-bold text-lg">{stats.invites}</span>
+          <span className="font-bold text-lg">{invitesCount}</span>
           <span className="text-xs text-gray-500">{t('invites')}</span>
         </div>
         <div className="flex flex-col items-center text-center">
