@@ -1,71 +1,67 @@
-import { Address, beginCell, toNano } from '@ton/core';
+import { Address, beginCell, toNano, SendMode } from '@ton/core';
 import { TonConnectUI } from '@tonconnect/ui-react';
 
-// Mock Jetton Master Address (Testnet)
-export const JETTON_MASTER_ADDRESS = 'EQD-ADH-JETTON-MASTER-ADDRESS-HERE';
+// ✅ YOUR REAL TESTNET ADDRESSES (replace after deploy)
+export const JETTON_MASTER_ADDRESS = Address.parse('EQD...YOUR-JETTON-MASTER');  // From TON Minter
+export const ADMIN_WALLET = Address.parse('YOUR-ADMIN-WALLET');  // Your Tonkeeper
 
-export const ADH_MINT_AMOUNT = 10;
-export const ADH_BURN_AMOUNT = 2;
+export const ADH_MINT_AMOUNT = 10n;  // bigint
+export const ADH_BURN_AMOUNT = 2n;
 
-export const createMintTransfer = (userAddress: string, amount: number) => {
-  // In a real app, this would be a message to the Jetton Master
-  // For this demo, we'll simulate the transaction
+// ✅ REAL MINT (Admin → User)
+export const createMintMessage = (userJettonWallet: Address, amount: bigint) => {
   return {
-    validUntil: Math.floor(Date.now() / 1000) + 60,
+    validUntil: Math.floor(Date.now() / 1000) + 300,  // 5 min
     messages: [
       {
         address: JETTON_MASTER_ADDRESS,
-        amount: toNano('0.05').toString(), // Gas for minting
+        amount: toNano('0.1'),  // Gas
         payload: beginCell()
-          .storeUint(0x1674b0a0, 32) // op::mint
-          .storeUint(0, 64) // query_id
-          .storeAddress(Address.parse(userAddress))
-          .storeCoins(toNano(amount))
+          .storeUint(0x1674b0a0, 32)  // op::mint
+          .storeUint(Math.floor(Math.random() * 1e9), 64)  // query_id
+          .storeAddress(userJettonWallet)
+          .storeCoins(amount)
           .endCell()
-          .toBoc()
-          .toString('base64'),
-      },
-    ],
+      }
+    ]
   };
 };
 
-// FunC Contract (Reference)
-/*
-#include "imports/stdlib.fc";
+// ✅ REAL BURN (User → null)
+export const createBurnMessage = (userJettonWallet: Address, amount: bigint) => {
+  return {
+    validUntil: Math.floor(Date.now() / 1000) + 300,
+    messages: [
+      {
+        address: userJettonWallet,
+        amount: toNano('0.05'),
+        payload: beginCell()
+          .storeUint(0x595f07bc, 32)  // op::burn
+          .storeUint(Math.floor(Math.random() * 1e9), 64)
+          .storeCoins(amount)
+          .storeCoins(toNano('0'))  // Send 0 back
+          .storeUint(0, 1)  // No response
+          .endCell()
+      }
+    ]
+  };
+};
 
-const int op::mint = 0x1674b0a0;
-const int op::burn = 0x595f07bc;
-
-global slice admin_address;
-global int total_supply;
-
-void load_data() inline {
-    slice ds = get_data().begin_parse();
-    admin_address = ds~load_msg_addr();
-    total_supply = ds~load_coins();
-}
-
-void save_data() inline {
-    set_data(begin_cell()
-        .store_slice(admin_address)
-        .store_coins(total_supply)
-        .end_cell());
-}
-
-void recv_internal(int msg_value, cell in_msg_full, slice in_msg_body) impure {
-    if (in_msg_body.slice_empty?()) { return; }
-    int op = in_msg_body~load_uint(32);
-    int query_id = in_msg_body~load_uint(64);
+// ✅ MAIN REWARD FUNCTION (Your AdWatcher calls this)
+export const rewardUser = async (tonConnectUI: TonConnectUI, userJettonWallet: Address) => {
+  try {
+    // 1. MINT 10 ADH to user
+    const mintTx = createMintMessage(userJettonWallet, ADH_MINT_AMOUNT);
+    await tonConnectUI.sendTransaction(mintTx);
     
-    load_data();
+    // 2. BURN 2 ADH (from admin or pool)
+    const burnTx = createBurnMessage(userJettonWallet, ADH_BURN_AMOUNT);
+    await tonConnectUI.sendTransaction(burnTx);
     
-    if (op == op::mint) {
-        slice to_address = in_msg_body~load_msg_addr();
-        int amount = in_msg_body~load_coins();
-        total_supply += amount;
-        ;; Logic to send jettons to user
-        save_data();
-        return;
-    }
-}
-*/
+    console.log('✅ 10 ADH minted + 2 ADH burned!');
+    return true;
+  } catch (error) {
+    console.error('TON Error:', error);
+    return false;
+  }
+};
