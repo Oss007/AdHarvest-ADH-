@@ -1,8 +1,56 @@
+# Dependencies
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Production builds
 build/
 dist/
+.next/
+out/
+
+# Testing
 coverage/
-.DS_Store
-*.log
+*.lcov
+
+# Environment
 .env*
 !.env.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Vercel / AI Studio
+.vercel
+ai-studio-secrets.json
+
+# TON Wallets (Security!)
+*.seed.json
+*.wallet
+
+# Logs
+*.log
+npm-debug.log*
+
+# Runtime data
+logs/
+.pnp
+.npm
